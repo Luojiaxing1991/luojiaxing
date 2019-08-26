@@ -1,0 +1,19 @@
+/* For CentOS */
+如果要修改EulerOS的启动参数，先修改 /etc/default/grub/grub.cfg
+
+在下面这一行中加入你需要的启动参数
+GRUB_CMDLINE_LINUX="crashkernel=auto net.ifnames=0 console=ttyAMA0,115200"
+
+然后通过grub2-mkconfig命令写入系统的grub
+grub2-mkconfig -o /boot/efi/EFI/centos/grub.cfg
+
+/* 各类启动参数 */
+
+*设置启动CPU个数*
+nr_cpus=1
+
+*SAS DFX启动参数*
+hisi_sas_main.debugfs_enable=1
+hisi_sas_main.debugfs_dump_count=25
+
+
