@@ -1,6 +1,9 @@
 # ITS maintainer's kernel git repo
 https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git/  
 
+# ITS MBI transport 
+![Image text](https://github.com/Luojiaxing1991/picture/blob/master/GICv3_MBI_transport.png)
+
 # Debug ITS
 
 我们可以在irq-gic-v3-its.c的文件开始加上  
