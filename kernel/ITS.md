@@ -1,3 +1,6 @@
+# ITS maintainer's kernel git repo
+https://git.kernel.org/pub/scm/linux/kernel/git/maz/arm-platforms.git/  
+
 # Debug ITS
 
 我们可以在irq-gic-v3-its.c的文件开始加上  
