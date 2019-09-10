@@ -33,4 +33,31 @@ e.g
 [    9.738721] ID:15 pID:9935 vID:38  
 [    9.742024] ID:16 pID:9936 vID:39   
 
+# LPI 
+
+locality-specific peripheral interrupt: 特定的本地外设中断。
+LPI中断是GIC v3新增支持的，跟其他中断在很大程度上有所不同。
+尤其，LPI中断一定是MBI（message-based interrupts）,这种中断的配置是保存在内存空间中的表格（tables）中，而不是在寄存器里面。
+
+LPI只有当 GICD_CTLR.ARE_NS == 1才会支持。那就是说只有EL1能执行 LPI的内存访问和配置修改？
+
+# Interrupt Identifiers
+
+每一个中断源都需要通过一个ID来标示它，简写为 INTID，这个ID可以理解为hw-irq，这与我们在系统里面看到的v-irq的值时不同的，这点请知悉。
+LPI中断被划分到8192~greater这一域段。
+
+这里后续可以把 GICv3_software_overview_official_release_B.pdf中的 “Table 3 Interrupt ID ranges”放上来
+
+# how LPIs are signaled to the GIC
+GICv3 追加了对 MBI中断的支持。我们可以通过写GIC寄存器的方式 设置/清除一个中断。具体来说是写ITS寄存器组，GITS_TRANSLATER。（后续应该把写哪些寄存器，写什么内容补充到这里，这个描述太简单了，到底写一个寄存器还是多个，都不清楚）
+
+后续把 GICv3_software_overview_official_release_B.pdf中的 “Figure 3 Message-based interrupt transported over the interconnect”放上来
+
+# Interrupt state machine
+
+通常中断有 inactive，active，pending，active and pengding 4种状态。
+
+但是LPI只有 inactive, pending两种状态。状态信息保存在内存中。
+当LPI被确认后，状态从pending转移到inactive。在LPI pending table中，一个LPI占用一个bit来标示状态。（但是对于同一个LPI，如果中断上报非常频繁，ITS确认不过来的情况下，如何处理，并没有说明，后续可以添加到这里）
+
 
