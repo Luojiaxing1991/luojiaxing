@@ -60,4 +60,14 @@ GICv3 追加了对 MBI中断的支持。我们可以通过写GIC寄存器的方�
 但是LPI只有 inactive, pending两种状态。状态信息保存在内存中。
 当LPI被确认后，状态从pending转移到inactive。在LPI pending table中，一个LPI占用一个bit来标示状态。（但是对于同一个LPI，如果中断上报非常频繁，ITS确认不过来的情况下，如何处理，并没有说明，后续可以添加到这里）
 
+# ACPI probe
+
+ITS可以使用ACPI的方式进行初始化。之所以他需要通过ACPI去初始化，是因为ITS在GIC里面，但是它的初始化区别于DT（device tree），所以它只能通过其他方式进行初始化，比如ACPI。
+它可以通过MADT表来收集寄存器的基地址。
+
+## MADT
+Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的
+
+## SRAT
+ACPI SRAT table是ACPI Static Resource Affinity Table的缩写，它的作用是保存处理器和内存的拓扑信息。
 
