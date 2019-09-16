@@ -60,6 +60,54 @@ GICv3 追加了对 MBI中断的支持。我们可以通过写GIC寄存器的方�
 但是LPI只有 inactive, pending两种状态。状态信息保存在内存中。
 当LPI被确认后，状态从pending转移到inactive。在LPI pending table中，一个LPI占用一个bit来标示状态。（但是对于同一个LPI，如果中断上报非常频繁，ITS确认不过来的情况下，如何处理，并没有说明，后续可以添加到这里）
 
+# Security model
+
+# Distributor interface
+
+ITS 不涉及 distributor，所以暂不关注
+
+# Redistributor interface
+
+对于ITS，转发器需要知道各个LPI中断的中断属性和pending state的内存基地址。 分发器只负责把IRQ分发到对应的转发器，是否进一步转发到PE，由转发器来决定。
+
+# CPU interfaces
+每一个转发器都会连接到一个CPU接口，CPU接口可以提供 如下的可编程接口：
+1. 通用配置和使能中断处理的配置
+2. 确认一个中断
+3. 执行中断的优先级降低和deactivation
+4. 给PE设置中断优先级mask
+5. Defining the preemption policy for the PE
+6. Determining the highest priority pending interrupt for the PE
+
+# Configuring LPIs
+
+## ITS
+
+### Operation of an ITS
+
+一个外设通过写入寄存器 GITS_TRANSLATER 来产生一个LPI。这次写操作主要提供下面两个数据：
+1. EventID
+   这个ID用来标示外设产生了哪一个中断。这个ID有可能跟INTID一致，也有可能由ITS转换为INTID
+2. DeviceID
+   这个ID用来标示外设。
+
+IST会把EventID转换为INTID，转换规则由外设决定，这就要求必需配合DeviceID。所以 ITS的INTID = EventID + DeviceID。
+
+LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中的所有INTID都会路由到一个指定的转发器上。
+
+一个ITS设备会用下面三种表来处理LPI的转换和路由。
+1. Device Tables
+   这个表用来通过DeviceID找到对应的ITT表
+2. Interrupt Translation Tables
+   这个表通过Device ID和 EventID来找到对应的 INTID。同时也会标示这个INTID属于哪个集合。
+3. Collection Tables
+   这是集合与转发器对应的表
+
+【可以把 sofgware_overview 文档的 Figure 17 An ITS forwarding an LPI to a Redistributor 图加到这里】
+
+### The command queue
+【未完，更新至此】
+
 # ACPI probe
 
 ITS可以使用ACPI的方式进行初始化。之所以他需要通过ACPI去初始化，是因为ITS在GIC里面，但是它的初始化区别于DT（device tree），所以它只能通过其他方式进行初始化，比如ACPI。
