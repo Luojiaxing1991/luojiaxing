@@ -106,7 +106,18 @@ LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中�
 【可以把 sofgware_overview 文档的 Figure 17 An ITS forwarding an LPI to a Redistributor 图加到这里】
 
 ### The command queue
-【未完，更新至此】
+我们可以通过储存在内存里的命令队列来控制ITS。这个是循环使用的buffer，通过下面三个寄存器来定义：
+1. GITS_CBASER
+这个寄存器定义了cq的基地址和长度。cq的长度必须是64KB对齐。cq里面的每个entry都是32bytes。
+
+2. GITS_CREADR
+指向ITS即将处理的下一个命令的index
+
+3. GITS_CWRITER
+这个寄存器指向下一个可写的entry。
+
+### Initial configuration of an ITS
+
 
 # ACPI probe
 
