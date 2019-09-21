@@ -117,16 +117,32 @@ LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中�
 这个寄存器指向下一个可写的entry。
 
 ### Initial configuration of an ITS
+### Initial configuration of an ITS
 
+1. 为设备和集合表申请内存空间
+寄存器 GITS_BASER[0~7]用来定义ITS设备以及集合表的基地址和大小。软件可以通过这些寄存器去发现ITS支持的表的数量和类型。
+我们知道ITS的寄存器位于内存中，且由ITS自行进行申请，ITS设备的内存空间中并不存储这些寄存器，而是由软件重新申请。
 
 # ACPI probe
+its_acpi_probe() 是用来对ITS设备进行probe的函数。
+BIOS在扫描ITS设备时已经为每个ITS设备都分配了内存空间，这段内存空间的首地址被存储在MADT表中。BISO还会为ITS设备创建SRAT表，
+SRAT表中会存储ITS相关NUMA节点信息。由于ITS没有专有内存，所以对应设备内存应该尽可能保存在相应的node节点下。包括后续ITS设备创建
+各类表格也需要考虑内存在哪个NUMA节点。
 
 ITS可以使用ACPI的方式进行初始化。之所以他需要通过ACPI去初始化，是因为ITS在GIC里面，但是它的初始化区别于DT（device tree），所以它只能通过其他方式进行初始化，比如ACPI。
 它可以通过MADT表来收集寄存器的基地址。
 
 ## MADT
-Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的
+Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的。
+
+ITS的MADT表中 主要存储了如下信息：
+1. GIC ITS ID：In a system with multiple GIC ITS units, this value must be unique to each one.
+2. Physical Base Address： The 64-bit physical address for the Interrupt Translation Service
 
 ## SRAT
 ACPI SRAT table是ACPI Static Resource Affinity Table的缩写，它的作用是保存处理器和内存的拓扑信息。
+对于ITS来言，NUMA节点这种与亲和性关联的信息就位于SRAT表中。
+
+## IORT
+
 
