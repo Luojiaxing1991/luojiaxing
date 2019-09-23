@@ -117,15 +117,14 @@ LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中�
 这个寄存器指向下一个可写的entry。
 
 ### Initial configuration of an ITS
-### Initial configuration of an ITS
 
 1. 为设备和集合表申请内存空间
 寄存器 GITS_BASER[0~7]用来定义ITS设备以及集合表的基地址和大小。软件可以通过这些寄存器去发现ITS支持的表的数量和类型。
-我们知道ITS的寄存器位于内存中，且由ITS自行进行申请，ITS设备的内存空间中并不存储这些寄存器，而是由软件重新申请。
+我们知道ITS的寄存器位于内存中，且由BIOS申请，并且把物理地址保存在MADT表中。ITS在MADT表中的物理地址，其实就是寄存器的基地址。
 
 # ACPI probe
 its_acpi_probe() 是用来对ITS设备进行probe的函数。
-BIOS在扫描ITS设备时已经为每个ITS设备都分配了内存空间，这段内存空间的首地址被存储在MADT表中。BISO还会为ITS设备创建SRAT表，
+BIOS在扫描ITS设备时已经为每个ITS设备都分配了内存空间，这段内存空间的首地址被存储在MADT表中。BIOS还会为ITS设备创建SRAT表，
 SRAT表中会存储ITS相关NUMA节点信息。由于ITS没有专有内存，所以对应设备内存应该尽可能保存在相应的node节点下。包括后续ITS设备创建
 各类表格也需要考虑内存在哪个NUMA节点。
 
@@ -139,9 +138,15 @@ ITS的MADT表中 主要存储了如下信息：
 1. GIC ITS ID：In a system with multiple GIC ITS units, this value must be unique to each one.
 2. Physical Base Address： The 64-bit physical address for the Interrupt Translation Service
 
+上述该物理地址（地址连续）需要通过ioremap()转换为驱动可以访问的虚拟地址。
+
 ## SRAT
 ACPI SRAT table是ACPI Static Resource Affinity Table的缩写，它的作用是保存处理器和内存的拓扑信息。
 对于ITS来言，NUMA节点这种与亲和性关联的信息就位于SRAT表中。
+
+## quiescent
+ITS的静默状态，该标志位位于GITS_CTLR，用来指示当GITS_CTLR.Enabled == 0时，所有ITS操作已经完成。意味着ITS没有任何业务在运行。
+
 
 ## IORT
 
