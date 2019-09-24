@@ -34,6 +34,7 @@ void reoder_small_2_bigger(int *array, int len)
 }
 
 # 快速排序
+
 int Partition(int arr[], int low, int high)
 {
     int base = arr[low];
@@ -52,7 +53,7 @@ int Partition(int arr[], int low, int high)
     }
     return low;
 }
- 
+
 void QuickSort(int arr[], int low, int high)
 {
     if(low < high)
