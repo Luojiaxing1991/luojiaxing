@@ -35,10 +35,10 @@ void reoder_small_2_bigger(int *array, int len)
 
 # 快速排序
 
-int Partition(int arr[], int low, int high)
-{
-    int base = arr[low];
-    while(low < high)
+int Partition(int arr[], int low, int high) 
+{ 
+    int base = arr[low]; 
+    while(low < high) 
     {
         while(low < high && arr[high] >= base)
         {
