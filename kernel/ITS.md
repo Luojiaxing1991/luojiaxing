@@ -116,6 +116,9 @@ LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中�
 3. GITS_CWRITER
 这个寄存器指向下一个可写的entry。
 
+command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，在ITS所处的node节点的内存上申请空间，这样可以提高ITS读取command queue的速度。
+申请到空间后，会把该内存空间（VA）通过virt_to_phys（）转换为PA，存储在GITS_CBASER中。
+
 ### Initial configuration of an ITS
 
 1. 为设备和集合表申请内存空间
@@ -149,5 +152,12 @@ ITS的静默状态，该标志位位于GITS_CTLR，用来指示当GITS_CTLR.Enab
 
 
 ## IORT
+
+## enable quirk
+不是非常理解这个概念，通过GITS_IIDR获取厂商信息，根据厂商信息做一些专有的配置工作吗？不清晰
+
+## its_alloc_tables
+
+这个主要开始申请table，主要包括DT，ITT，CT。
 
 
