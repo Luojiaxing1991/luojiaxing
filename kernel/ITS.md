@@ -125,7 +125,18 @@ command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，�
 寄存器 GITS_BASER[0~7]用来定义ITS设备以及集合表的基地址和大小。软件可以通过这些寄存器去发现ITS支持的表的数量和类型。
 我们知道ITS的寄存器位于内存中，且由BIOS申请，并且把物理地址保存在MADT表中。ITS在MADT表中的物理地址，其实就是寄存器的基地址。
 
-# ACPI probe
+# ITS probe
+
+ITS驱动是在GIC 做初始化的时候进行加载的。
+分为两步进行初始化：
+1. its_init()
+2. its_cpu_init()
+
+# its_init()
+
+its_init()中会对ITS进行probe，分为两种方式：its_of_probe（）和  its_acpi_probe().
+
+## its_acpi_probe()
 its_acpi_probe() 是用来对ITS设备进行probe的函数。
 BIOS在扫描ITS设备时已经为每个ITS设备都分配了内存空间，这段内存空间的首地址被存储在MADT表中。BIOS还会为ITS设备创建SRAT表，
 SRAT表中会存储ITS相关NUMA节点信息。由于ITS没有专有内存，所以对应设备内存应该尽可能保存在相应的node节点下。包括后续ITS设备创建
@@ -133,6 +144,46 @@ SRAT表中会存储ITS相关NUMA节点信息。由于ITS没有专有内存，所
 
 ITS可以使用ACPI的方式进行初始化。之所以他需要通过ACPI去初始化，是因为ITS在GIC里面，但是它的初始化区别于DT（device tree），所以它只能通过其他方式进行初始化，比如ACPI。
 它可以通过MADT表来收集寄存器的基地址。
+
+### acpi_table_parse_srat_its()
+
+在这个函数中，我们首先通过 acpi_table_parse_entries()在SRAT表中通过 ACPI_SRAT_TYPE_GIC_ITS_AFFINITY 遍历查找对应的SRAT表，如果存在5个该类型的表，那么说明有5个ITS设备，然后为its_srat_maps分配5个ITS设备的空间。接下来，也通过 acpi_table_parse_entries()依次回调 gic_acpi_parse_srat_its（）来为每个ITS设备解析对应的SRAT信息。
+
+ITS从BIOS的SRAT表中可以获取亲和性数据，主要包括numa_node和its_id的信息，保存在全局变量 its_srat_maps 中
+struct its_srat_map {
+	/* numa node id */
+	u32	numa_node;
+	/* GIC ITS ID */
+	u32	its_id;
+};
+
+### acpi_table_parse_madt()
+这个函数是通过 ACPI_MADT_TYPE_GENERIC_TRANSLATOR 在MART表中遍历该类型的表，同时回调 gic_acpi_parse_madt_its 进行 MADT表的解析。
+
+在 gic_acpi_parse_madt_its() 中， ITS这种translator是有专门的一种结构体描述
+struct acpi_madt_generic_translator {
+	struct acpi_subtable_header header;
+	u16 reserved;		/* reserved - must be zero */
+	u32 translation_id;
+	u64 base_address;
+	u32 reserved2;
+};
+
+此函数首先了填充 struct resource的 start = base_address， end = base_address + ACPI_GICV3_ITS_MEM_SIZE（128K） - 1。flags为IORESOURCE_MEM。
+
+接着可以 产生 struct fwnode_handle， 其中 struct fwnode_handle 是包含在 struct irqchip_fwid中， base_address也会保存在irqchip_fwid中。
+而fwnode_handle.ops是用 irqchip_fwnode_ops 进行默认赋值。
+
+iort_register_domain_token这个函数不知道什么意思，待分析。
+
+上面的 translation_id 和 SRAT表中的 its_id应该是一致的，由此通过 translation_id 来从 its_srat_maps 中来获取它的numa node信息。
+
+我们开始调用 its_probe_one()来进行ITS的初始化,入参如下：
+struct resource *res,
+struct fwnode_handle *handle,
+int numa_node    //numa node是从its_srat_maps中获取。
+
+接着解析MADT表，
 
 ## MADT
 Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的。
