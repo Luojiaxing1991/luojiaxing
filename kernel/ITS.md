@@ -105,20 +105,6 @@ LPI中的几个INTIDs，它们会被组进各自的集合中。一个集合中�
 
 【可以把 sofgware_overview 文档的 Figure 17 An ITS forwarding an LPI to a Redistributor 图加到这里】
 
-### The command queue
-我们可以通过储存在内存里的命令队列来控制ITS。这个是循环使用的buffer，通过下面三个寄存器来定义：
-1. GITS_CBASER
-这个寄存器定义了cq的基地址和长度。cq的长度必须是64KB对齐。cq里面的每个entry都是32bytes。
-
-2. GITS_CREADR
-指向ITS即将处理的下一个命令的index
-
-3. GITS_CWRITER
-这个寄存器指向下一个可写的entry。
-
-command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，在ITS所处的node节点的内存上申请空间，这样可以提高ITS读取command queue的速度。
-申请到空间后，会把该内存空间（VA）通过virt_to_phys（）转换为PA，存储在GITS_CBASER中。
-
 ### Initial configuration of an ITS
 
 1. 为设备和集合表申请内存空间
@@ -157,6 +143,10 @@ struct its_srat_map {
 	u32	its_id;
 };
 
+#### SRAT表
+ACPI SRAT table是ACPI Static Resource Affinity Table的缩写，它的作用是保存处理器和内存的拓扑信息。
+对于ITS来言，NUMA节点这种与亲和性关联的信息就位于SRAT表中。
+
 ### acpi_table_parse_madt()
 这个函数是通过 ACPI_MADT_TYPE_GENERIC_TRANSLATOR 在MART表中遍历该类型的表，同时回调 gic_acpi_parse_madt_its 进行 MADT表的解析。
 
@@ -169,23 +159,7 @@ struct acpi_madt_generic_translator {
 	u32 reserved2;
 };
 
-此函数首先了填充 struct resource的 start = base_address， end = base_address + ACPI_GICV3_ITS_MEM_SIZE（128K） - 1。flags为IORESOURCE_MEM。
-
-接着可以 产生 struct fwnode_handle， 其中 struct fwnode_handle 是包含在 struct irqchip_fwid中， base_address也会保存在irqchip_fwid中。
-而fwnode_handle.ops是用 irqchip_fwnode_ops 进行默认赋值。
-
-iort_register_domain_token这个函数不知道什么意思，待分析。
-
-上面的 translation_id 和 SRAT表中的 its_id应该是一致的，由此通过 translation_id 来从 its_srat_maps 中来获取它的numa node信息。
-
-我们开始调用 its_probe_one()来进行ITS的初始化,入参如下：
-struct resource *res,
-struct fwnode_handle *handle,
-int numa_node    //numa node是从its_srat_maps中获取。
-
-接着解析MADT表，
-
-## MADT
+#### MART表
 Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的。
 
 ITS的MADT表中 主要存储了如下信息：
@@ -194,12 +168,68 @@ ITS的MADT表中 主要存储了如下信息：
 
 上述该物理地址（地址连续）需要通过ioremap()转换为驱动可以访问的虚拟地址。
 
-## SRAT
-ACPI SRAT table是ACPI Static Resource Affinity Table的缩写，它的作用是保存处理器和内存的拓扑信息。
-对于ITS来言，NUMA节点这种与亲和性关联的信息就位于SRAT表中。
+回归，此函数首先了填充 struct resource的 start = base_address， end = base_address + ACPI_GICV3_ITS_MEM_SIZE（128K） - 1。flags为IORESOURCE_MEM。
 
-## quiescent
-ITS的静默状态，该标志位位于GITS_CTLR，用来指示当GITS_CTLR.Enabled == 0时，所有ITS操作已经完成。意味着ITS没有任何业务在运行。
+接着可以 产生 struct fwnode_handle， 其中 struct fwnode_handle 是包含在 struct irqchip_fwid中， base_address也会保存在irqchip_fwid中。
+而fwnode_handle.ops是用 irqchip_fwnode_ops 进行默认赋值。
+
+iort_register_domain_token这个函数不知道什么意思，待分析。
+
+上面的 translation_id 和 SRAT表中的 its_id应该是一致的，由此通过 translation_id 来从 its_srat_maps 中来获取它的numa node信息。
+
+### its_probe_one
+我们开始调用 its_probe_one()来进行ITS的初始化,入参如下：
+struct resource *res,
+struct fwnode_handle *handle,
+int numa_node    //numa node是从its_srat_maps中获取。
+
+首先将 res.start转换为VA，赋值给its_base；接着通过读取寄存器GICD_PIDR2来获取当前ITS设备的GIC版本： GICv1,GICv2,GICv3,GICv4.ITS只支持GICv3/v4.
+
+ITS初始化之前需要停止当前业务，通过 its_force_quiescent（）实现。该函数通过 寄存器GITS_CTLR 确认ITS是否处于静默状态且disable，如果是，则直接退出，否则需要disable ITS并等待ITS进入静默状态后退出。在等待静默状态过程中，通过cpu_relax让CPU进入低功耗，减少资源浪费。
+
+#### quiescent
+ITS的静默状态，该标志位位于GITS_CTLR，用来指示当GITS_CTLR.Enabled == 0时，所有ITS操作已经完成。意味着ITS没有任何业务在运行。RO。
+
+#### cpu_relax
+通知底层CPU，ARM32的代码没有在做什么实际有意义的事情，如果可以的话，别让cpu做太多事情，系统的资源尽量让给其他的cpu。ARM64目前支持
+典型用法：
+n = 1000; //睡眠1s
+while(n > 0){
+	n--;
+	cpu_relax();
+	mdelay(1);
+}
+
+ITS进入静默后，为ITS申请内存空间存储为its。通过 GITS_TYPER 获取 ITE size和 GIVv4以及 VMOVP的一些配置信息。并填充到its。
+另外，its.base保存寄存器基地址的VA，its.ite_size保存ITE的size，its.numa_node保存numa节点相关的信息。
+
+接着开始准备ITS的cmd queue
+
+#### The command queue
+我们可以通过储存在内存里的命令队列来控制ITS。这个是循环使用的buffer，通过下面三个寄存器来定义：
+1. GITS_CBASER
+这个寄存器定义了cq的基地址和长度。ITS的CQ size为64KB。cq里面的每个entry都是32bytes。
+
+2. GITS_CREADR
+指向ITS即将处理的下一个命令的index
+
+3. GITS_CWRITER
+这个寄存器指向下一个可写的entry。
+
+command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，在ITS所处的node节点的内存上申请空间，这样可以提高ITS读取command queue的速度。
+申请到空间后，会把该内存空间（VA）通过virt_to_phys（）转换为PA，存储在GITS_CBASER中。
+
+【可以把 software文档 的 Figure 18 ITS circular command queue 贴到这里】
+
+接下来申请各类table
+
+#### indirect
+
+由于一个ITS表的大小限制为64K，而每一个entry的大小为32bytes，那么一个ITS最大支持 64K/32 = 2048个entry。举例，如果这个表是DT表，那么系统中通过ITS翻译中断的设备数目大于 2048，则需要使用2-level table来进行扩容。否则就直接使用fat table。
+
+its_setup_baser（），待续
+
+#### its_alloc_tables()
 
 
 ## IORT
