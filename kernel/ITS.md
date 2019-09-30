@@ -227,7 +227,11 @@ command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，�
 
 由于一个ITS表的大小限制为64K，而每一个entry的大小为32bytes，那么一个ITS最大支持 64K/32 = 2048个entry。举例，如果这个表是DT表，那么系统中通过ITS翻译中断的设备数目大于 2048，则需要使用2-level table来进行扩容。否则就直接使用fat table。
 
-its_setup_baser（），待续
+its_setup_baser（），在ITS所在的numa node节点申请内存空间，以提高内存访问效率。分配的VA转换为PA，存储在GICS_BASER中。
+目前BASER的table有三类：
+DT，CT，VCT（VCPU），但是ITT在哪里？
+
+its_alloc_collections（），待续
 
 #### its_alloc_tables()
 
