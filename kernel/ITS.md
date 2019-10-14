@@ -230,8 +230,9 @@ command queue是ITS在probe时进行内存的申请，通过alloc_pages_node，�
 its_setup_baser（），在ITS所在的numa node节点申请内存空间，以提高内存访问效率。分配的VA转换为PA，存储在GICS_BASER中。
 目前BASER的table有三类：
 DT，CT，VCT（VCPU），但是ITT在哪里？
+ITS设备支持8个baser，每一个baser对应一种table类型，至于baser与table类型的对应关系，在ITS设备的寄存器地址中可以获取，应该是芯片固化的内容，在ITS驱动加载的时候，这些对应关系已经确立。当前的ITS驱动只是根据该baser应该对应的table类型为table申请内存空间，并把该空间的VA写入在baser寄存器中。
 
-its_alloc_collections（），待续
+its_alloc_collections（） 申请ct表的内存空间
 
 #### its_alloc_tables()
 
@@ -244,5 +245,16 @@ its_alloc_collections（），待续
 ## its_alloc_tables
 
 这个主要开始申请table，主要包括DT，ITT，CT。
+
+
+## 创建device
+
+PCIE设备在申请中断的时候，首先会调用 irq-gic-v3-its-msi.c中的ops函数：msi_prepare ，该函数指针保存在struct msi_domain_ops its_pci_msi_ops中，然后会继续往下调用irq-gic-v3-its.c中的ops函数：msi_prepare 完成device的创建。该ops位于 struct msi_domain_ops its_msi_domain_ops中。对于每一个pcie设备都会用一个device id与之对应，并在在DT表中为该设备创建一个entry。
+
+### device id
+ITS驱动可以在 结构体 msi_alloc_info_t->scratchpad[0].ul 中拿到该pcie设备的device id。通过pci_msi_domain_get_msi_rid()获取 MSI requester id（RID）作为ITS的device id。
+
+
+
 
 
