@@ -257,6 +257,12 @@ ITS驱动可以在 结构体 msi_alloc_info_t->scratchpad[0].ul 中拿到该pcie
 
 # vpe
 
+# vpe_domain
 
+# vpe初始化和map
+its_init_vpe_domain
+	->
+		->its_map_vm
 
+		->its_vpe_db_proxy_map_locked
 
