@@ -255,6 +255,8 @@ PCIE设备在申请中断的时候，首先会调用 irq-gic-v3-its-msi.c中的o
 ITS驱动可以在 结构体 msi_alloc_info_t->scratchpad[0].ul 中拿到该pcie设备的device id。通过pci_msi_domain_get_msi_rid()获取 MSI requester id（RID）作为ITS的device id。
 
 
+# vpe
+
 
 
 
