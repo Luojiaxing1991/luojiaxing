@@ -14,3 +14,12 @@ https://blog.csdn.net/weixin_38419133/article/details/89412755
 
 ![Image text](https://github.com/Luojiaxing1991/picture/blob/master/GICv3_MBI_transport.png) 
 
+
+# repo
+
+## 统一创建一个工作分支
+repo start xxx --all
+
+## repo更新本能所有仓库
+repo sync
+
