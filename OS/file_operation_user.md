@@ -154,7 +154,7 @@ int ioctl(int fd, unsigned long request, ...);
        
  ## read()
  ### manual of read()
-http://man7.org/linux/man-pages/man2/ioctl.2.html
+http://man7.org/linux/man-pages/man2/read.2.html
 
 ### 定义
 ssize_t read(int fd, void *buf, size_t count)
