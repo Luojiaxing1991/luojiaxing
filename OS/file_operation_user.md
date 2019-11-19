@@ -75,6 +75,16 @@ fds：  The set of file descriptors to be monitored is specified in the fds
        of the file descriptors, then poll() blocks until one of the events
        occurs.
 
+事件类型events 可以为下列值：
+
+POLLIN           有数据可读
+POLLRDNORM 有普通数据可读，等效与POLLIN
+POLLPRI         有紧迫数据可读
+POLLOUT        写数据不会导致阻塞
+POLLER          指定的文件描述符发生错误
+POLLHUP        指定的文件描述符挂起事件
+POLLNVAL      无效的请求，打不开指定的文件描述符
+
 nfds:  The caller should specify the number of items in the fds array in
        nfds.
        
@@ -94,7 +104,7 @@ timeout:The timeout argument specifies the number of milliseconds that poll()
        in timeout means an infinite timeout.  Specifying a timeout of zero
        causes poll() to return immediately, even if no file descriptors are
        ready.
-     
+    
 ### poll机制说明
 https://www.cnblogs.com/amanlikethis/p/6915485.html
 
