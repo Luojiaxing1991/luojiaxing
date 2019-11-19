@@ -94,7 +94,14 @@ timeout:The timeout argument specifies the number of milliseconds that poll()
        in timeout means an infinite timeout.  Specifying a timeout of zero
        causes poll() to return immediately, even if no file descriptors are
        ready.
-       
+     
+### poll机制说明
+https://www.cnblogs.com/amanlikethis/p/6915485.html
+
+### poll 用户态使用 内核态回调处理
+https://www.jianshu.com/p/8cd91b71709a
+
+     
 ## close()
 ### manual of poll()
 http://man7.org/linux/man-pages/man2/close.2.html
