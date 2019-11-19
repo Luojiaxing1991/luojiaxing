@@ -75,16 +75,6 @@ fds：  The set of file descriptors to be monitored is specified in the fds
        of the file descriptors, then poll() blocks until one of the events
        occurs.
 
-事件类型events 可以为下列值：
-
-POLLIN           有数据可读
-POLLRDNORM 有普通数据可读，等效与POLLIN
-POLLPRI         有紧迫数据可读
-POLLOUT        写数据不会导致阻塞
-POLLER          指定的文件描述符发生错误
-POLLHUP        指定的文件描述符挂起事件
-POLLNVAL      无效的请求，打不开指定的文件描述符
-
 nfds:  The caller should specify the number of items in the fds array in
        nfds.
        
@@ -110,6 +100,17 @@ https://www.cnblogs.com/amanlikethis/p/6915485.html
 
 ### poll 用户态使用 内核态回调处理
 https://www.jianshu.com/p/8cd91b71709a
+
+### event
+事件类型events 可以为下列值：
+
+POLLIN           有数据可读
+POLLRDNORM 有普通数据可读，等效与POLLIN
+POLLPRI         有紧迫数据可读
+POLLOUT        写数据不会导致阻塞
+POLLER          指定的文件描述符发生错误
+POLLHUP        指定的文件描述符挂起事件
+POLLNVAL      无效的请求，打不开指定的文件描述符
 
 ## close()
 ### manual of poll()
