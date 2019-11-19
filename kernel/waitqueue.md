@@ -22,3 +22,22 @@
 
 C文件：
 ./kernel/sched/wait.c
+
+# waitqueue使用
+
+## 初始化一个waitqueue
+
+```C
+wait_queue_head_t my_queue;
+init_waitqueue_head(&my_queue);
+```
+
+## 往waitqueue里面添加一个wait entry，这个entry对应一种condition，并且进程开始睡眠。这个entry会自动创建并添加到wq。
+
+```C
+wait_event_interruptible(queue, condition)
+```
+## 在另外一个线程中发现condition已经满足，则发送一个wakeup消息到wq，wq遍历后，会把对应entry的进程重新调度起来
+```C
+wake_up_interruptible(wait_queue_head_t *queue)
+```
