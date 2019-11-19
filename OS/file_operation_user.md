@@ -101,7 +101,6 @@ https://www.cnblogs.com/amanlikethis/p/6915485.html
 ### poll 用户态使用 内核态回调处理
 https://www.jianshu.com/p/8cd91b71709a
 
-     
 ## close()
 ### manual of poll()
 http://man7.org/linux/man-pages/man2/close.2.html
