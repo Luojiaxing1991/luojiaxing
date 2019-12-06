@@ -159,7 +159,7 @@ struct acpi_madt_generic_translator {
 	u32 reserved2;
 };
 
-#### MART表
+#### MADT表
 Multiple APIC Description Table的略称，APIC又是Advanced Programmable Interrupt Controller的略称，由于ITS是中断控制器中的设备，所以他的信息是存储在MADT中的。
 
 ITS的MADT表中 主要存储了如下信息：
