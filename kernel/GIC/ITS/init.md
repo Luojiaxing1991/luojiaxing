@@ -68,11 +68,11 @@ LPI有两个table，一个是LPI Configuration table，一个是LPI Pending tabl
 - LPI Configuration table: 每一个INTID都有都有一个byte来记录它的优先级
 - LPI pending table：每一个INTID都有都有1bit来记录它的状态
 
-每一个CPU都有一个pending table，pending table中的每一个位对应一个lpi中断
+对于 LPI Configuration table，它可以和SPI，PPI，SGI等共用，就看谁先申请，如果ITS初始化时该配置table还没有建立，就新建，如果已经建立，就直接使用。
 
+每一个CPU都有一个LPI pending table，pending table中的每一个位对应一个lpi中断。LPI的状态和SPI，PPI等的状态设计并不一致，所以LPI pending table是LPI独用的。
 
 最后通过 register_syscore_ops 注册一个ITS的syscore_ops钩子函数到syscore，当CPU online后，需要通过这个钩子函数往ITS里面注册该CPU的GICR信息
-
 
 its_init()的初始化流程到此结束。
 
