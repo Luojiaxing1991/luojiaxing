@@ -1,6 +1,7 @@
 + GIC v4.1简介
 + GIC v4.1新增特性介绍
    + vPE configuration table
+   + GICR_VPENDBASER
    + default doorbell机制
    + vSGI
    + VMAPP
@@ -18,3 +19,4 @@
 
 ## vPe configuration table
 
+## GICR_VPENDBASER
