@@ -20,3 +20,8 @@
 ## vPe configuration table
 
 ## GICR_VPENDBASER
+GICv4.1中，这个寄存器其实被完全重写了
+
+这个寄存器被用于描述当前被scheduel的vPE信息以及刚刚被deschedule的上一任vPE的残留信息（pending last，）
+
+![pending last and doorbell and dirty](https://github.com/Luojiaxing1991/picture/blob/master/VPENDBASER_GIC_4_1.png)
