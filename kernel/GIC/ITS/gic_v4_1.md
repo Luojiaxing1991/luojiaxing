@@ -2,9 +2,9 @@
 + GIC v4.1新增特性介绍
    + vPE configuration table
    + GICR_VPENDBASER
+   + VMAPP
    + default doorbell机制
    + vSGI
-   + VMAPP
    + 其他变更
 + vPE table详解
    + GICR 三类table介绍
@@ -18,10 +18,15 @@
 # GIC v4.1新增特性介绍
 
 ## vPe configuration table
+![vPE configuration table](https://github.com/Luojiaxing1991/picture/blob/master/vPE_configuration_table.png)
 
 ## GICR_VPENDBASER
-GICv4.1中，这个寄存器其实被完全重写了
-
-这个寄存器被用于描述当前被scheduel的vPE信息以及刚刚被deschedule的上一任vPE的残留信息（pending last，）
+GICv4.1中，GICR_VPENDBASER虽然沿用了GICv4.0的命名方法，但是由于vLPI Pending table由vPE configuration table进行管理。所以这个寄存器被重新设计。主要用于下面三个功能：
++ 记录当前被scheduel（valid == 1）的vPE的id（vPEID）
++ vPE被deschedule后（valid 1->0）,通过pending last告诉hypervisor这个vPE急需被重新调度
++ vPE被deschedule后（valid 1->0），通过doorbell来指示该vPE的default doorbell是否需要使能。
 
 ![pending last and doorbell and dirty](https://github.com/Luojiaxing1991/picture/blob/master/VPENDBASER_GIC_4_1.png)
+
+## VMAPP
+
