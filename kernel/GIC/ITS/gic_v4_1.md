@@ -62,3 +62,6 @@ default doorbell和individual doorbell有一些本质的区别是 default doorbe
 这就决定了default doorbell的数量会小于individual doorbell，对于hypervisor来说，负担就减轻了，但是对于一些优先级比较高的中断，还是采用individual doorbell比较好。
 
 ![default doorbell IRQ](https://github.com/Luojiaxing1991/picture/blob/master/ITS_default_doorbell_IRQ.png)
+
+## vSGI
+待更新
