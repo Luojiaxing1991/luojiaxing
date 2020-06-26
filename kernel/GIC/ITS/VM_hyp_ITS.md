@@ -9,25 +9,25 @@
 
 # vPE deschedule
 
-kvm_handle_wfx - +
-                 | - kvm_vcou_block - +
-                                      | - kvm_arch_vcpu_blocking - +
+kvm_handle_wfx - +  
+                 | - kvm_vcou_block - +  
+                                      | - kvm_arch_vcpu_blocking - +  
                                                                    | - vgic_v4_put(vcpu, true)  //true mean door bell is need
 
-check_vcpu_request - + //put之后里面调用load，跟vPE deschedule无关，估计是一些reload操作
-                     | - vgic_v4_put(vcpu, false)
-                     | - vgic_v4_load
+check_vcpu_request - + //put之后里面调用load，跟vPE deschedule无关，估计是一些reload操作  
+                     | - vgic_v4_put(vcpu, false)  
+                     | - vgic_v4_load  
                      
                      
-kvm_arch_vcpu_ioctl_run - + //vCPU没能在规定的时间片内完成所有操作，被调度出去后需要立即进入排队。                  
-                          | - vcpu_put - +
-                                         | - kvm_arch_vcpu_put   //rest is the same with sched_out
+kvm_arch_vcpu_ioctl_run - + //vCPU没能在规定的时间片内完成所有操作，被调度出去后需要立即进入排队。                    
+                          | - vcpu_put - +  
+                                         | - kvm_arch_vcpu_put   //rest is the same with sched_out  
 
-kvm_preempt_ops.sched_out - + //vCPU抢占
-                            | - kvm_sched_out - +
-                                                | - kvm_arch_vcpu_put - +
-                                                                        | - kvm_vgic_put - +
-                                                                                           | - vgic_v4_put(vcpu, false) - + //false mean that no door bell need
+kvm_preempt_ops.sched_out - + //vCPU抢占  
+                            | - kvm_sched_out - +  
+                                                | - kvm_arch_vcpu_put - +  
+                                                                        | - kvm_vgic_put - +  
+                                                                                           | - vgic_v4_put(vcpu, false) - + //false mean that no door bell need  
                                                                                                                           | - itc_make_vpe_non_resident
 
 
