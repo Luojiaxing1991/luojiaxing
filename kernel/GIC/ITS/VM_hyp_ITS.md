@@ -8,7 +8,7 @@
 
 
 # vPE deschedule
-
+``` C
 kvm_handle_wfx - +  
                  | - kvm_vcou_block - +  
                                       | - kvm_arch_vcpu_blocking - +  
@@ -29,11 +29,23 @@ kvm_preempt_ops.sched_out - + //vCPU抢占
                                                                         | - kvm_vgic_put - +  
                                                                                            | - vgic_v4_put(vcpu, false) - + //false mean that no door bell need  
                                                                                                                           | - itc_make_vpe_non_resident
-
+```
 
 # vPE schedule
+``` C
+kvm_arch_vcpu_ioctl_run - +
+                          | - vcpu_load - +
+                                          | - kvm_arch_vcpu_load
 
-kvm_arch_vcpu_unblocking
+kvm_sched_in - +
+               | - kvm_arch_vcpu_load - +
+                                        | - kvm_vgic_load - +
+                                                            | - vgic_v3_load - +
+                                                                               | - vgic_v4_load - +
+                                                                                                  | - its_make_vpe_resident
+                                                            
+
+```
 
 # vCPU的schedule/deschedule机制
 当vCPU空闲或者等待物理内核处理一些事情的时候，vCPU会被调度出去，类似于进程调度，但是对于vCPU而言，并不会有阻塞CPU的行为，因为其他vCPU可能正在等待调度，因此正好可以把CPU的资源让渡出来。
@@ -41,7 +53,8 @@ KVM中提供了一个函数 handle_exit(struct kvm_vcpu *vcpu...),专门用于�
 
 KVM中有一个exit_handle_fn的结构体，定义了各种退出信号的处理，其中和vCPU block/unblock相关的主要是 ESR_ELx_EC_WFx，用于处理WFI和WFE两类信号（kvm_handle_wfx（））。
 
-## doorbell使能与否
+## doorbell发给了谁？
+doorbell是一种中断，所以它只能发送给CPU，而CPU知道这个是doorbell中断，应该会通过回调函数的方式，进入hypervisor，从而让目标vCPU得到调度。在vCPU被调度的时候，GICR也需要将vPE调度到PE上。
 
 
 
