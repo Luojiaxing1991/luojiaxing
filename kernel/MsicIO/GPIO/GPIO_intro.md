@@ -1,5 +1,6 @@
 + GPIO简介
-+ 如何获得GPIO硬件资源
++ 驱动如何获得GPIO硬件描述
++ 用户如何获得GPIO硬件资源
    + GPIO desc
       + GpioINT
       + GpioIO
@@ -8,7 +9,11 @@
 
 # GPIO简介
 
-# 如何获得GPIO硬件资源
+# 驱动如何获得GPIO硬件描述
+
+# GPIO控制器中断获取
+
+# 用户如何获得GPIO硬件资源
 
 ## GPIO desc
 用户可以通过gpiod_get_index()来或者一个GPIO的desc。
@@ -18,9 +23,11 @@ gpiod_get_index(struct device *dev, const char *con_id, unsigned int idx, enum g
 这个API包括四个入参，dev主要指GPIO的消费者，con_id描述这个消费者对这个GPIO的用途（自定义），idx描述在这个用途下的GPIO的index，flag。
 
 这些资源一般会在ACPI的DSDT表或者设备树资源描述里，以ACPI举例：
+``` C
 Device(SPI0){
   Name(_DSD, Package() {“cs-gpios”， Package(){^SPI0, 0, 0, 0,},},)
 }
+```
 
 一般ACPI会把消费者（用户模块）对于GPIO的描述放在_DSD里面。通常以package宏来定义。我们可以这样解释上面这个描述：SPI0有一个cs-gpios的功能是通过{^SPI0,0,0,0}的GPIO口实现的。gpiod_get_index()中的con_id其实就对应“cs”,由于gpiolib要求ACPI添加GPIO特定描述，因此，ACPI在扫描GPIO资源时会组合 {con_id}-gpios进行组合（参考acpi_find_gpio()）。
 
