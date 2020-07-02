@@ -6,6 +6,8 @@
    + platform_data
 + 平台设备与平台驱动的绑定
 + ACPI注册平台设备
++ 用户获取平台设备资源
+   + 用户获取平台设备中断
 
 # 平台设备简介
 linux设备驱动模型主要基于总线，设备，驱动三元素实现。linux设备必定会挂在在总线上（PCI，USB，IIC，SPI）等，而每一个设备都有对应的驱动代码。但是，对于集成在SoC里面的外设，一般通过系统内部总线来进行数据交互，而且内部总线通常基于具体产品实现决定，对于linux内核而言，无法进行统一管理。因此，linux内核创建了虚拟总线（platform bus）来对这一类设备进行管理。
@@ -54,4 +56,8 @@ Device（GPO1）{
 }
 
 由于platfrom_device包含device，因此，这种父子关系会传递到device中。在device中，通过父子节点来表示这种层级，因此可以使用device_get_child_node_count(struct device * ）来获取子节点的个数，或者通过device_for_each_child_node（）来进行子节点的遍历。
+
+# 用户获取平台设备资源
+
+## 用户获取平台设备中断
 
