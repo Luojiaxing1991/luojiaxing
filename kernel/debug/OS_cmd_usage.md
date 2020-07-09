@@ -4,6 +4,7 @@
 + 提高打印等级
 + 压缩/解压缩
 + chmod修改文件权限
++ 通过perf调试性能
 + ubuntu
    + 设置ubuntu启动DHCP获取IP
    + ubuntu源码仓库
@@ -26,6 +27,10 @@
    + 修改启动参数
    + 修改kdump的启动参数
    + Euler SSH 无法连接问题的解决
++ OS命令
+   + SCSI
+   + PCIe
+   + NUMA
 
 # 内核编译
 ``` C
@@ -113,6 +118,17 @@ unzip filename.zip
 chmod -R 777 xxx
 ```
 
+# 通过perf调试性能
+
+## 参考blog
+https://www.cnblogs.com/arnoldlu/p/6241297.html
+
+## 通过perf record记录，通过perf report查看记录
+``` C
+perf record -g -F 99 -a
+
+perf report --call-graph none
+```
 # ubuntu
 
 ## 设置ubuntu启动DHCP获取IP
@@ -438,3 +454,51 @@ drwx--x--x 2 1015 1020 4096 Jan  5  2018 /var/empty/sshd
 
 通过 chown root /var/empty/sshd/ 修改这个文件的root归属，然后 重启ssh服务，问题解决。
 ```
+
+# OS命令
+
+## SCSI
+
+### 基本命令
++ lsscsi
++ disktool -s or disktool -f a /dev/sdm
++ blkid //可以获取PARTUUID以及一些磁盘信息
++ smp_discover /dev/bsg/expander-0\:0
+
+### smartctl
+``` C
+查看磁盘速率
+smartctl -a /dev/sdb | grep SATA
+
+参考资料：
+https://www.cnblogs.com/fiberhome/p/8275961.html
+
+https://blog.csdn.net/pansaky/article/details/86650134
+```
+
+### DIF盘状态查看
+lsscsi -p
+
+### DIF盘格式化与恢复
+``` C
+检查是否支持DIF
+sg_vpd --page=ei --long /dev/sda |grep SPT
+
+格式化命令：
+DIF TYPE1
+sg_format --format --fmtpinfo=2 /dev/sda
+
+DIF TYPE3
+sg_format --format --fmtpinfo=3 --pfu=1 /dev/sda
+
+恢复成正常盘
+sg_format -F -s 512 /dev/sda
+```
+### PCIe
+``` C
+lspci -s 0000:74:02 -v
+
+lspci -tv
+```
+### NUMA
+numactl
