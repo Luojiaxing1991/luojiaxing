@@ -49,6 +49,9 @@ _cond_resched
 ``` C
 __schedule - +
              | - context_switch - +
+                                  | - prepare_task_switch - +
+                                                            | - fire_sched_out_preempt_notifiers - +
+                                                                                                   | - notifier->ops->sched_out()
                                   | - finish_task_switch - +
                                                            | - fire_shced_in_preempt_notifiers - +
                                                                                                  | - notifier->ops->sched_in()
