@@ -1,5 +1,6 @@
 + DMA简介
 + DMA的基本处理思路
++ DMA基本API
 
 # DMA简介
 DMA是Direct Memory Access的略称。主要用于在外设和内存之间实现数据的快速传递，在这个过程中是不需要CPU参与数据的搬运。
@@ -15,3 +16,6 @@ DMA产生的背景是因为现在CPU的速度越来越快，而外设IO的速度
 
 在目前的硬件设计中，DMA的细节大部分被硬件的逻辑屏蔽，驱动的API变得简单的同时，但对于新手来说，通过驱动理解DMA变得更加困难。
 
+![DMA base introduce](https://github.com/Luojiaxing1991/picture/blob/master/DMA_base_intr.png)
+
+# DMA基本API
