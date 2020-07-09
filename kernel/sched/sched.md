@@ -44,3 +44,13 @@ preempt_schedule
 ### 释放自旋锁抢占
 
 _cond_resched
+
+# 调用栈
+``` C
+__schedule - +
+             | - context_switch - +
+                                  | - finish_task_switch - +
+                                                           | - fire_shced_in_preempt_notifiers - +
+                                                                                                 | - notifier->ops->sched_in()
+```
+
