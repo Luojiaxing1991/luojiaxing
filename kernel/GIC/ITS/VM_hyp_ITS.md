@@ -56,6 +56,7 @@ KVM中有一个exit_handle_fn的结构体，定义了各种退出信号的处理
 ## doorbell发给了谁？
 doorbell是一种中断，所以它只能发送给CPU，而CPU知道这个是doorbell中断，应该会通过回调函数的方式，进入hypervisor，从而让目标vCPU得到调度。在vCPU被调度的时候，GICR也需要将vPE调度到PE上。
 
+## sched_in
 
 
 
