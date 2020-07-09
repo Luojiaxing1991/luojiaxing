@@ -29,7 +29,13 @@
 
 # 内核编译
 ``` C
+export ARCH=arm64
+export CROSS_COMPILE=aarch64-linux-gnu-
+make defconfig
+make -j64
 
+// 更加严格的编译告警
+make C=2 V=2 -j64
 ```
 
 # 模块参数
