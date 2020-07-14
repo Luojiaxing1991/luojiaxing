@@ -46,15 +46,15 @@ ACPI驱动通过DSDT表里面的HID来识别是否为平台设备（type.platfor
 apci_bus_scan
 -> acpi_bus_attach
    -> acpi_default_enumeration
-      -> acpi_create_platfrom_device.
+      -> acpi_create_platform_device.
       
 DSDT表中，Device是有嵌套关系，acpi会根据嵌套关系以{父设备，子设备}的顺序依次申请
-
+``` C
 Device（GPO1）{
      Device（PRTA） {
      }
 }
-
+```
 由于platfrom_device包含device，因此，这种父子关系会传递到device中。在device中，通过父子节点来表示这种层级，因此可以使用device_get_child_node_count(struct device * ）来获取子节点的个数，或者通过device_for_each_child_node（）来进行子节点的遍历。
 
 # 用户获取平台设备资源
