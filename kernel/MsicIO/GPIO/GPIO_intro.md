@@ -6,6 +6,8 @@
       + GpioIO
    + GPIO PIN interrupt
 + GPIO框架
++ 在SYSFS里面调试GPIO
+
 
 # GPIO简介
 
@@ -62,3 +64,8 @@ fwnode_get_named_gpiod()会通过 acpi_node_get_gpiod（）获取gpio_desc和 st
 
 
 ## GPIO PIN interrupt
+
+# 在SYSFS里面调试GPIO
+编译内核时，通过make menuconfig中勾选Device Drivers->GPIO Support->/sys/class/gpio/...(sysfs interface)。
+
+系统中可以找到/sys/class/gpio目录。
