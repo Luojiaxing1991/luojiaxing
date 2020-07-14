@@ -1,3 +1,11 @@
++ 中断控制器简述
++ Arm架构内的中断控制器
++ 中断控制器的结构体们
+   + 中断域
+      + 中断域与fwnode_handle
+      + 线性映射 & 树映射 & 不映射
+      + 创建映射与查找映射
+
 # 中断控制器简述
 
 中断是计算机体系中非常重要的一种信号机制。在中断体系中，最简单的功能是硬件打断软件，让它紧急去处理一件事情，而其中负责信号中转的就是中断控制器。
@@ -15,7 +23,7 @@ GIC是ARM架构内的通用中断控制器，直接对接CPU，处理的中断�
 
 ARM为GPIO这一类中断控制器提供了一个irq_chip_generic的抽象概念。GPIO的底软驱动可以通过irq_alloc_domain_generic_chips这类通用的API为一个irq_domain创建irq_chip_generic。这个可以为驱动编写减轻负担，不需要考虑中断控制器内部逻辑实现。但是irq_chip_generic有一个限制是只能支持32个中断，因此如果irq_domain中的中断个数比较多，要么为一个irq_domain创建几个irq_chip_generic，要么是自行创建irq_chip，并进行管理，不使用irq_chip_generic。
 
-# 中断控制器的逻辑描述
+# 中断控制器的结构体们
 
 ## 中断域
 每一个中断控制器的代码都会首先涉及struct irq_domain这个结构体，以及为自己申请一个irq_domain的资源描述。其他硬件描述如irq_chip_generic和irq_chip都是基于irq_domain来承载。irq_domain翻译过来就是
@@ -25,6 +33,10 @@ ARM为GPIO这一类中断控制器提供了一个irq_chip_generic的抽象概念
 至于为什么irq_domain会在中断控制器的硬件抽象中占据这么重要的地位呢？笔者认为，对于linux各模块而言，他们眼中能看到的中断只包括三个东西，Linux IRQ number，回调函数，以及对应硬件事件含义（对于自家硬件，肯定知根知底）。
 很经济实在，就像女人眼中，结婚就等于房车一样直接。那么，既然客户眼里只有这几个东西，那中断信号是通过电击枪还是通过阿姆斯特朗回旋加速喷气式阿姆斯特朗炮给你一记刺激，对客户他们来说，并不重要，
 因此，通过一个mapping关系告诉客户，这个数字，表示之前不久的一个moment，发生了一件什么事情，就是最重要的事情。这就决定了irq_domain的江湖地位，不是老大，也是教主。
+
+### 中断域与fwnode_handle
+fwnode_handle作为描述设备集合的原子结构体，它的指针会保存在acpi_device和device_node结构体中，因此，irq_domain与fwnode_handle绑定，可以避免在irq_domain中区分acpi设备和设备树设备。
+![irq_domain 与 fwnode_handle](https://github.com/Luojiaxing1991/picture/blob/master/irq_domain%26fwnode_handle.png)
 
 ### 线性映射 & 树映射 & 不映射
 中断控制器的驱动代码会通过irq_domain_add_*()这样的一个函数来创建和注册中断域，*号其实对应这个三类方法，linear，tree和nomap。（举个栗子，组合起来就是irq_domain_add_linear（））。这三种方式的区别在于两点：首先，nomap跟
