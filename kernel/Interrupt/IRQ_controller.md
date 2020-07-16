@@ -6,6 +6,8 @@
       + 中断域与fwnode_handle
       + 线性映射 & 树映射 & 不映射
       + 创建映射与查找映射
+   + irq_chip
+      + irq_chip的ops
 
 # 中断控制器简述
 
@@ -54,3 +56,24 @@ PS：对应的三个API函数为： irq_domain_add_linear() irq_domain_add_tree(
 ### 创建映射与查找映射
 创建映射： irq_create_mapping()
 查找映射： irq_find_mapping()
+
+# irq_chip
+
+
+## irq_chip的ops
+
+### irq_ack
+调用栈如下：
+``` C
+desc->handle_irq(desc) - +
+                         | -  handle_edge_irq(for example) - +
+                                                              | - desc->irq_data.chip->irq_ack()
+```
+irq_ack主要是通知硬件该中断已被CPU处理中，可以解除该中断的pending状态，并接受新的中断。对于边沿中断，由于边沿触发是短暂的，所以当前触发信号的结束很容易判断。但是对于电平中断，电平信号可能长时间维持高电平，即使软件发出了irq_ack，但是pending状态会持续到中断线解除高电平（或低电平）。
+
+### irq_mask/irq_unmask
+设置中断屏蔽的ops，设置中断屏蔽后该中断源无法触发中断处理。通常情况下，当驱动ack了一个中断号，进入中断处理后，需要暂时屏蔽该中断，防止同一个中断之间的嵌套。
+
+### irq_enable/irq_disable
+
+### irq_set_type
