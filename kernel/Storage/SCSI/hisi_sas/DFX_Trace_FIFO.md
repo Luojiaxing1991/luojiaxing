@@ -66,3 +66,5 @@ DFX trace FIFO配置接口的默认值从系统启动后的对应寄存器中获
 ### 配置更新到硬件
 当用户往update_config写1，驱动读取dump_disable寄存器获取当前trace FIFO的状态。往dump_disable写1停止FIFO，然后更新配置到SAS控制器，然后重启FIFO。
 
+用户往update_config写1时，会拉取所有配置并更新到硬件，因此此时应该检查配置的可靠性，对于部分配置存在取值限制的需要检查，如果不符合要求，不执行配置更新操作。
+
