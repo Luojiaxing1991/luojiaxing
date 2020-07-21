@@ -1,4 +1,7 @@
 + 需求分析
+   + 配置项
+   + 数据读取
+   + 配置更新到硬件
 
 # 需求分析
 DFX trace FIFO主要用于辅助芯片定位链路异常或者链路优化的DFX工具。DFX dump工具主要面向异常场景，而本工具主要面向非异常场景。因此，本工具与DFX dump工具的代码实现是隔离的。
@@ -11,8 +14,9 @@ DFX trace FIFO有一些配置项可以提供给用户。
 ```
 由于硬件设计DFX trace FIFO是按默认配置使能，并会实时往硬件cache里面写入状态数据。所以，在修改配置或者读取数据时，需要暂停FIFO的数据写入。硬件cache的大小为32 * 4byte = 128byte，每4个byte为一组完整数据。由于是实时写入，cache的数据是不断更新的，用户可以配置硬件在特定条件下，停止写入，或者继续写入32byte后停止。具体查看dump_mode。
 
-dump_disable系统启动默认为0，就是说系统启动后硬件cache就会被不断写值。
-除了0和1以外，不接受其他设值。
+dump_disable寄存器系统启动默认为0，就是说系统启动后硬件cache就会被不断写值。
+
+用户可以不直接感知dump_disable，我们提供给用户一个update_config的接口，客户可用于更新配置。update_config只写，不可读。写1后将配置更新到硬件，并通过打印告知用户本次更新的配置一览。
 ```
 + signal_sel
 ```
@@ -54,8 +58,11 @@ trigger/trigger_msk的输入值范围：{0x~0xFFFFFFFF}
 ```
 DFX trace FIFO配置接口的默认值从系统启动后的对应寄存器中获取。仅root用户可以读写。debugfs对输入有限制的参考之前配置项需求描述细节。
 
-## 数据读取
-用户可以通过data的文件来查看本次trace出来的DFX数据。该文件仅root用户可读。在文件的开头，标识出本次trace的配置数据一览。然后依次解析32组dump芯片状态数据包。
+## 数据读取 rd_data
+用户可以通过rd_data的文件来查看本次trace出来的DFX数据。虽然在读取数据时，需要先disable FIFO的写入，但是这些操作可以对用户屏蔽。该文件仅root用户可读。在文件的开头，标识出本次trace的配置数据一览。然后依次解析32组dump芯片状态数据包。
 
+当用户读取rd_data时，往dump_disable写1停止FIFO，然后按照DFX trace FIFO读取数据的方法读取全部DFX数据，然后重启FIFO。
 
+### 配置更新到硬件
+当用户往update_config写1，驱动读取dump_disable寄存器获取当前trace FIFO的状态。往dump_disable写1停止FIFO，然后更新配置到SAS控制器，然后重启FIFO。
 
