@@ -5,6 +5,7 @@ DFX trace FIFO主要用于辅助芯片定位链路异常或者链路优化的DFX
 
 从用户角度看，用户主要通过debugfs来使用DFX trace FIFO。hisi_sas DFX的基目录位于/sys/kernel/debug/hisi_sas/。我们通过dev_name(dev)在里面为每一个SAS控制器建立了一个文件夹。名字为PCIe总线号，例如0000:74:02.0。FIFO会在该文件夹下有一个独立的子文件夹，命名为trace_fifo。该文件夹不受trigger_dump文件的影响，这个文件只影响dump文件夹，属于DFX dump工具。
 
+## 配置项
 DFX trace FIFO有一些配置项可以提供给用户。
 + dump_disable
 ```
@@ -51,4 +52,10 @@ trigger_mode的输入值范围：{0x1,0x10,0x100},具体定义参考寄存器手
 
 trigger/trigger_msk的输入值范围：{0x~0xFFFFFFFF}
 ```
-DFX trace FIFO接口的默认值从系统启动后的对应寄存器中获取。仅仅root用户可以读写。debugfs对输入有限制的参考之前配置项需求描述细节。
+DFX trace FIFO配置接口的默认值从系统启动后的对应寄存器中获取。仅root用户可以读写。debugfs对输入有限制的参考之前配置项需求描述细节。
+
+## 数据读取
+用户可以通过data的文件来查看本次trace出来的DFX数据。该文件仅root用户可读。在文件的开头，标识出本次trace的配置数据一览。然后依次解析32组dump芯片状态数据包。
+
+
+
