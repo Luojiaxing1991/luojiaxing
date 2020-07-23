@@ -12,6 +12,8 @@ DFX trace FIFO主要用于辅助芯片定位链路异常或者链路优化的DFX
 
 从用户角度看，用户主要通过debugfs来使用DFX trace FIFO。hisi_sas DFX的基目录位于/sys/kernel/debug/hisi_sas/。我们通过dev_name(dev)在里面为每一个SAS控制器建立了一个文件夹。名字为PCIe总线号，例如0000:74:02.0。FIFO会在该文件夹下有一个独立的子文件夹，命名为trace_fifo。该文件夹不受trigger_dump文件的影响，这个文件只影响dump文件夹，属于DFX dump工具。
 
+用户建议将rd_data按照signal_sel的配置进行解析打印，但是这样会导致驱动代码冗长，考虑不解析，后续由用户通过脚本进行解析。
+
 ## 配置项
 DFX trace FIFO有一些配置项可以提供给用户。
 + dump_disable
