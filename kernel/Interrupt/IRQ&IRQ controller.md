@@ -1,14 +1,69 @@
++ IRQ
+   + irq_chip与irq_common_data与irq_data
+   + irq_chip
+      + irq_chip的ops   
 + 中断控制器简述
 + Arm架构内的中断控制器
 + 中断控制器的结构体们
-   + irq_chip与irq_data
    + 结构体们
    + 中断域
       + 中断域与fwnode_handle
       + 线性映射 & 树映射 & 不映射
       + 创建映射与查找映射
-   + irq_chip
-      + irq_chip的ops
+
+# IRQ
+
+## irq_chip与irq_common_data与irq_data
+irq_chip和irq_common_data，irq_data的定义都位于irq.h中(include/linux/irq.h)，用作最底层的中断属性描述。irq_data与irq_chip，irq_common_data之间都存在单向的连接。而irq_chip和irq_common_data之间不存在联系。因此中断的重心在于irq_desc->irq_data->irq_chip的单向链条，irq_common_data可认为是irq_data的一些补充说明。
+
+这里应该补充一个图，来说明中断的核心结构体。
+
+irq_data是irq_desc的成员变量。每一个中断都有一个irq_data与之对应。所以它描述的是每一个中断所独有的一些属性，包括中断号，中断寄存器的mask，中断所属的irq_domain，中断所属的irq_chip，中断对应的私有变量chip_data。irq_common_data可以为irq_data提供关于亲和性，NUMA节点，中断标记位等补充信息。共同构成对中断的描述。
+``` C
+struct irq_data {
+   u32 mask;
+   unsigned int irq;
+   ...
+   struct irq_common_data *common;
+   struct irq_chip *chip;
+   struct irq_domain *domain;
+   ...
+   void *chip_data;
+}
+```
+
+irq_common_data是irq_desc的成员变量。它主要为irq_data提供一些补充信息，如下：
+``` C
+struct irq_common_data {
+   unisgned int __private state_use_accessors;
+   unsigned int node;
+   ...
+   struct msi_desc *msi_desc;
+   cpumask_var_t affinity;
+}
+```
+
+irq_chip是中断类的方法集合。主要描述中断的一些通用方法，直接对接中断控制器硬件。详细可以查看后续的irq_chip章节。
+
+# irq_chip
+
+## irq_chip的ops
+
+### irq_ack
+调用栈如下：
+``` C
+desc->handle_irq(desc) - +
+                         | -  handle_edge_irq(for example) - +
+                                                              | - desc->irq_data.chip->irq_ack()
+```
+irq_ack主要是通知硬件该中断已被CPU处理中，可以解除该中断的pending状态，并接受新的中断。对于边沿中断，由于边沿触发是短暂的，所以当前触发信号的结束很容易判断。但是对于电平中断，电平信号可能长时间维持高电平，即使软件发出了irq_ack，但是pending状态会持续到中断线解除高电平（或低电平）。
+
+### irq_mask/irq_unmask
+设置中断屏蔽的ops，设置中断屏蔽后该中断源无法触发中断处理。通常情况下，当驱动ack了一个中断号，进入中断处理后，需要暂时屏蔽该中断，防止同一个中断之间的嵌套。
+
+### irq_enable/irq_disable
+
+### irq_set_type
 
 # 中断控制器简述
 
@@ -28,8 +83,7 @@ GIC是ARM架构内的通用中断控制器，直接对接CPU，处理的中断�
 ARM为GPIO这一类中断控制器提供了一个irq_chip_generic的抽象概念。GPIO的底软驱动可以通过irq_alloc_domain_generic_chips这类通用的API为一个irq_domain创建irq_chip_generic。这个可以为驱动编写减轻负担，不需要考虑中断控制器内部逻辑实现。但是irq_chip_generic有一个限制是只能支持32个中断，因此如果irq_domain中的中断个数比较多，要么为一个irq_domain创建几个irq_chip_generic，要么是自行创建irq_chip，并进行管理，不使用irq_chip_generic。
 
 # 中断控制器的结构体们
-## irq_chip与irq_data
-irq_chip和irq_data的定义都位于irq.h中(include/linux/irq.h)，用作最底层的中断属性描述。
+
 
 ## 结构体们
 ![irq_domain 与 irq_data 与 irq_chip](https://github.com/Luojiaxing1991/picture/blob/master/irq_domain%26irq_data%26irq_chip.png)
@@ -61,23 +115,4 @@ PS：对应的三个API函数为： irq_domain_add_linear() irq_domain_add_tree(
 创建映射： irq_create_mapping()
 查找映射： irq_find_mapping()
 
-# irq_chip
 
-
-## irq_chip的ops
-
-### irq_ack
-调用栈如下：
-``` C
-desc->handle_irq(desc) - +
-                         | -  handle_edge_irq(for example) - +
-                                                              | - desc->irq_data.chip->irq_ack()
-```
-irq_ack主要是通知硬件该中断已被CPU处理中，可以解除该中断的pending状态，并接受新的中断。对于边沿中断，由于边沿触发是短暂的，所以当前触发信号的结束很容易判断。但是对于电平中断，电平信号可能长时间维持高电平，即使软件发出了irq_ack，但是pending状态会持续到中断线解除高电平（或低电平）。
-
-### irq_mask/irq_unmask
-设置中断屏蔽的ops，设置中断屏蔽后该中断源无法触发中断处理。通常情况下，当驱动ack了一个中断号，进入中断处理后，需要暂时屏蔽该中断，防止同一个中断之间的嵌套。
-
-### irq_enable/irq_disable
-
-### irq_set_type
