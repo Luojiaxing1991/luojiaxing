@@ -1,6 +1,7 @@
 + 中断控制器简述
 + Arm架构内的中断控制器
 + 中断控制器的结构体们
+   + irq_chip与irq_data
    + 结构体们
    + 中断域
       + 中断域与fwnode_handle
@@ -27,7 +28,10 @@ GIC是ARM架构内的通用中断控制器，直接对接CPU，处理的中断�
 ARM为GPIO这一类中断控制器提供了一个irq_chip_generic的抽象概念。GPIO的底软驱动可以通过irq_alloc_domain_generic_chips这类通用的API为一个irq_domain创建irq_chip_generic。这个可以为驱动编写减轻负担，不需要考虑中断控制器内部逻辑实现。但是irq_chip_generic有一个限制是只能支持32个中断，因此如果irq_domain中的中断个数比较多，要么为一个irq_domain创建几个irq_chip_generic，要么是自行创建irq_chip，并进行管理，不使用irq_chip_generic。
 
 # 中断控制器的结构体们
-# 结构体们
+## irq_chip与irq_data
+irq_chip和irq_data的定义都位于irq.h中(include/linux/irq.h)，用作最底层的中断属性描述。
+
+## 结构体们
 ![irq_domain 与 irq_data 与 irq_chip](https://github.com/Luojiaxing1991/picture/blob/master/irq_domain%26irq_data%26irq_chip.png)
 
 irq_domain是一种中断域，用来描述中断的集合；irq_data（ird_desc）主要描述中断对象；irq_chip描述某一类中断的方法。
