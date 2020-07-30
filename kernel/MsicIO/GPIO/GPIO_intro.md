@@ -7,9 +7,11 @@
    + GPIO PIN interrupt
 + GPIO框架
 + 在SYSFS里面调试GPIO
+   + 获得一个GPIO口进行调试
 
 
 # GPIO简介
+GPIO的内核描述文档位于/Documentation/driver-api/gpio.
 
 # 驱动如何获得GPIO硬件描述
 
@@ -69,3 +71,16 @@ fwnode_get_named_gpiod()会通过 acpi_node_get_gpiod（）获取gpio_desc和 st
 编译内核时，通过make menuconfig中勾选Device Drivers->GPIO Support->/sys/class/gpio/...(sysfs interface)。
 
 系统中可以找到/sys/class/gpio目录。
+
+## 获得一个GPIO口进行调试
+gpio目录下有三类文件，export,unexport,gpiochixxx文件夹。用户可以通过export获取一个GPIO口的控制，unexport来释放。对用户可将的GPIO控制器信息由gpiochipxxx来获得。
+
+### gpiochipxxx
+gpiochipxxx包含一些GPIO控制器的属性，其中base是当前GPIO控制器第一个GPIO口的偏移。用于export/unexport。而ngpio则标记了这个GPIO控制器的GPIO口数量。
+
+``` C
+echo 480 > export  //480 = base + offset
+```
+
+### gpioxxx
+当echo 480 > export后，gpio文件夹中会新增一个gpio480的文件夹。
