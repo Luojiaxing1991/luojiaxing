@@ -74,7 +74,7 @@ fwnode_get_named_gpiod()会通过 acpi_node_get_gpiod（）获取gpio_desc和 st
 ## GPIO chip
 GPIO框架会用一个GPIO chip（struct gpio_chip）来描述一组GPIO.每一组GPIO在GPIO框架里面被视为一个GPIO device(gpio_device).
 gpio_chip结构体的元素如下：
-+ base: 描述该gpio_chip在系统中的基础偏移。
++ base: 描述该gpio_chip在系统中的基础偏移。一般驱动配置该值为-1，由GPIO框架自行分配。GPIO框架一般从大到小分配，因此，如果该gpio控制器是系统第一个GPIO控制器，那么该base值为480(512-32).
 
 
 # 在SYSFS里面调试GPIO
