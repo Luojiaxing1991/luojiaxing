@@ -6,8 +6,10 @@
       + GpioIO
    + GPIO PIN interrupt
 + GPIO框架
+   + GPIO chip
 + 在SYSFS里面调试GPIO
    + 获得一个GPIO口进行调试
+   + export&unexport
 
 
 # GPIO简介
@@ -67,6 +69,14 @@ fwnode_get_named_gpiod()会通过 acpi_node_get_gpiod（）获取gpio_desc和 st
 
 ## GPIO PIN interrupt
 
+# GPIO框架
+
+## GPIO chip
+GPIO框架会用一个GPIO chip（struct gpio_chip）来描述一组GPIO.每一组GPIO在GPIO框架里面被视为一个GPIO device(gpio_device).
+gpio_chip结构体的元素如下：
++ base: 描述该gpio_chip在系统中的基础偏移。
+
+
 # 在SYSFS里面调试GPIO
 编译内核时，通过make menuconfig中勾选Device Drivers->GPIO Support->/sys/class/gpio/...(sysfs interface)。
 
@@ -84,3 +94,6 @@ echo 480 > export  //480 = base + offset
 
 ### gpioxxx
 当echo 480 > export后，gpio文件夹中会新增一个gpio480的文件夹。
+
+## export&unexport
+export的内核回调函数是export_store(),位于gpiolib-sysfs.c。unexport对应的是unexport_store();
