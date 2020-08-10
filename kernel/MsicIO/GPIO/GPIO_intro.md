@@ -1,5 +1,7 @@
 + GPIO简介
 + 驱动如何获得GPIO硬件描述
+   + 通过devres获得
+   + 通过GPIO号获得
 + 用户如何获得GPIO硬件资源
    + GPIO desc
       + GpioINT
@@ -16,6 +18,12 @@
 GPIO的内核描述文档位于/Documentation/driver-api/gpio.
 
 # 驱动如何获得GPIO硬件描述
+## 通过devres获得
+BIOS可以通过ACPI为驱动指定GPIO口，例如gpioIO这个宏，驱动可以调用devm_gpiod_get_index()，通过GPIO口的名称和index来找到对应的gpio_desc。
+
+当然，ACPI还有一个宏gpioINT，但是暂没有找到相关例子，所以不知道这个应该怎么用。部分驱动，例如I2C，可以通过devm_gpiod_get_index()拿到gpio_desc，然后gpiod_to_irq()拿到中断号，通过硬编码的方式在request_irq的时候指定中断触发的类型。
+
+## 通过GPIO号获得
 
 # GPIO控制器中断获取
 
