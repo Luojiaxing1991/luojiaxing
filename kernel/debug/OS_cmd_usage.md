@@ -1,6 +1,7 @@
 + 内核编译
 + 模块参数
 + rpm & yum
+   + 解压rpm文件
 + 提高打印等级
 + 压缩/解压缩
 + chmod修改文件权限
@@ -47,6 +48,9 @@ make C=2 V=2 -j64
 /sys/module/<模块名称>/parameters
 
 # rpm & yum
+
+## 解压rpm文件
+rpm2cpio xx.rpm | cpio -div
 
 ## 查看rpm包版本
 rpm -q rdma-core
