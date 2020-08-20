@@ -21,5 +21,5 @@ EL3          Secure Monitor
 + EL3：Secure Moniter的作用是用于Normal world和Secure world切换使用。当Normal world想要访问secure world时，需要发送SMC指令进入Secure Moniter层然后进入Secure world
 
 # SCR_EL3
-SCR_EL3（Secure）这个系统寄存器用于
+SCR_EL3（Secure）这个系统寄存器用于Secure configuration。具体可以查看系统寄存器手册。
 
