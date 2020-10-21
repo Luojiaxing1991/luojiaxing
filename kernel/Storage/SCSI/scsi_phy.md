@@ -84,4 +84,14 @@ SCSI特定为character定义了命令规则（Zxx.y），辅助协议的可读�
 后续更新
 
 ## Phy capabilities bits
-如果phy的两端支持SNW-3，在做Train_Tx-SNW之前，需要互相交换Phy capabilities bits。这是一个32bit的数据块。主要包括5块内容，1个起始位，一个TX SSC TYPE标记位，用于标记SSC（这个标记位的具体定义查看协议5.7 Phy capabilities bits），一个 REQUESTED LOGICAL LLINK RATE域，用于指示是否支持multiplexing；一个Supported Settings域，用于标识支持的速率，Train_Tx-SNW和Train_Rx-SNW会基于这个来生成训练的parameter，以及一个PARITY位，用于校验。
+如果phy的两端支持SNW-3，在进入Train_Tx-SNW之前，需要互相交换Phy capabilities bits。这是一个32bit的数据块。主要包括5块内容，1个起始位，一个TX SSC TYPE标记位，用于标记SSC（这个标记位的具体定义查看协议5.7 Phy capabilities bits），一个 REQUESTED LOGICAL LLINK RATE域，用于指示是否支持multiplexing；一个Supported Settings域，用于标识支持的速率，Train_Tx-SNW和Train_Rx-SNW会基于这个来生成训练的parameter，以及一个PARITY位，用于校验。
+
+Phy两端在交换完Phy capabilities bits后根据双方提供的域段REQUESTED LOGICAL LLINK RATE，决定一个初步的最高协商速率。这个判断是两端各自进行的，但是由于双方都收到了对方的Phy capabilities bits。最终双方各自的决定也应该是相同的，心有灵犀。速率决定好之后，有Supported Setting bit决定SSC，如果SSC不一致，则继续往下寻找一个支持双方协商的配置。
+
+## BMC coding
+后续跟新
+
+## Train_TX-SNW TTIUs
+这些是属于比较底层的速率协商阶段的设计，对于驱动开发而言，过于透明，暂不研究，有需要再更新。
+
+## Phy reset sequences
