@@ -1,3 +1,4 @@
++ 中断的诞生
 + IRQ
    + irq_chip与irq_common_data与irq_data
    + irq_chip
@@ -10,6 +11,44 @@
       + 中断域与fwnode_handle
       + 线性映射 & 树映射 & 不映射
       + 创建映射与查找映射
+
+# 参考
+Linux kernel的中断子系统之（一）：综述
+http://www.wowotech.net/irq_subsystem/interrupt_subsystem_architecture.html
+
+# 中断的诞生
+中断分为线中断和消息中断两类。线中断是直接用中断线连接到中断控制器，通过电平或者边沿来触发中断的方式，而消息中断是通过总线写操作来触发中断。
+
+## 中断控制器注册中断域
+Linux内核以irq_domain来描述一个中断控制器管理的中断集合。中断控制器驱动在初始化时会通过irq_domain_add_xxx接口来申请一段中断域给自己所有的中断源使用。例如，GIC(ARM架构的中断控制器)在其初始化函数gic_apci_init()->gic_init_bases()会基于GIC协议规定的线中断个数来申请irq_domain。在gic_v3的代码中，irq_domain是基于tree来管理中断，因为GIC v3新增了对LPI的支持，这使得GIC v3管理的中断个数远远超过1024个，线性的irq_domain无法满足这种需求。
+
+## 中断控制器映射硬中断和软中断
+
+### 线中断
+外设与中断控制器的连接方式（线中断）以及硬件中断号的分配由硬件设计决定，通常会以中断向量表的方式（该表内的中断号为硬件中断号）呈现给驱动。当然，这个硬件中断号通常也不是提供给驱动开发人员，而是会体现在外设的资源描述，比如DT表或者ACPI表中。以ACPI为例，ACPI协议提供了Interrupt宏为外设的事件指定一个对应的中断。
+``` C
+Interrupt (ResourceUsage, EdgeLevel, ActiveLevel, Shared, ResourceSourceIndex, ResourceSource, DescriptorName) {InterruptList}
+```
+
+在查看设备相关的ACPI表时，经常可以看到一个设备描述中会带一个Interrupt宏。
+
+外设在probe驱动的时候，可以通过platform_get_irq()来从ACPI表中检索属于自己的软件中断号（注意，是软件中断号，这个函数返回的时候，硬件中断号和软件中断号的映射已经完成，返回软件中断号给驱动用于注册回调函数）。
+
+硬中断和软中断的映射调用栈如下（以GIC为例）：
+``` C
+platform_get_irq -
+                 + acpi_irq_get -
+                                + irq_create_fwspec_mapping -
+                                                            + irq_domain_alloc_irqs -
+                                                                                    + irq_domain_alloc_irqs_hierarchy -
+                                                                                                                      + domain->ops->alloc()
+```
+GIC 将 gic_irq_domain_alloc作为钩子函数注册在domain->ops->alloc中。
+gic_irq_domain_map
+
+
+## 线中断
+
 
 # IRQ
 
