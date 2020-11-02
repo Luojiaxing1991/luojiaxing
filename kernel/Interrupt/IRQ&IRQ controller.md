@@ -9,6 +9,7 @@
 + 中断控制器的结构体们
    + 结构体们
    + 中断域
+      + 创建PCIe的中断域
       
       + 中断域与fwnode_handle
       + 线性映射 & 树映射 & 不映射
@@ -69,7 +70,16 @@ GIC 将 gic_irq_domain_alloc作为钩子函数注册在domain->ops->alloc中。
 gic_irq_domain_map
 
 ### 消息中断
-待更新
+消息中断主要指通过总线写操作来触发中断的一种实现方式。由于我们通过通过MSI/MSI-X中断来实现消息中断，因此我们以MSI中断为例子来描述消息中断。
+
+#### 向PCIe申请消息中断
+由于MSI都是经由PCI来发往ITS，因此PCIe是ITS的子级中断控制器。同理，ITS是GIC的子级中断控制器。而PCIe设备在申请MSI中断的时候，只能向PCIe申请。每一个PCIe设备能申请的最大中断个数由支持MSI或者MSI-X决定。MSI的话，上限为32个，而MSI-X则多达2048个。PCIe设备通过通用API：pci_alloc_irq_vectors或者亲和性API：pci_alloc_irq_vertors_affinity申请中断。中断亲和性不在这个章节描述，所以我们在这里只分析通用API
+
+``` C
+
+```
+
+
 
 # IRQ
 
