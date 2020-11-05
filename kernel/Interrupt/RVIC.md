@@ -19,6 +19,8 @@ RVIC支持两种类型的中断：
 1. Trusted interrupts
 2. Untrusted interrupts
 
+每一个RVIC实例
+
 # 支持的Hypervisor类型
 RVIC可支持整体型Hypervisor(monolithic hypervisor)和分离型Hypervisor(Split-mode hypervisor)。分离型Hypervisor根据中断的特权级别分为Trusted Hypervisor和Untrusted Hypervisor。对于整体型Hypervisor则不做区分。
 
