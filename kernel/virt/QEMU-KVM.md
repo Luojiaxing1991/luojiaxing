@@ -3,6 +3,7 @@
    + kvm介绍
    + qemu-kvm
 + 基本原理
++ 通过QEMU起小系统
 + 参考网页及资料
 
 # qemu-kvm简介
@@ -44,6 +45,12 @@ QEMU发起ioctl来调用KVM接口，KVM则利用硬件扩展直接将虚拟机�
 虚拟机内存会被映射到QEMU的进程地址空间，在启动时分配。在虚拟机看来，QEMU所分配的主机上的虚拟地址空间为虚拟机的物理地址空间。
 
 QEMU在主机用户态模拟虚拟机的硬件设备，vCPU对硬件的操作结果会在用户态进行模拟。如果虚拟机需要将数据写入硬盘，实际结果是将数据写入到了主机中的一个镜像文件中。
+
+# 通过QEMU起小系统
+qemu-system-aarch64 -machine virt,kernel_irqchip=on,gic-version=3 -cpu host -enable-kvm -smp 4,sockets=1,cores=2 -m 1024 -kernel /home/luo/Image -initrd /home/luo/minifs.cpio.gz -nographic -append "rdinit=init console=ttyAMA0 earlycon=pl011,0x9000000"
+
+退出qemu
+ctrl + x 再按a    (同时)
 
 # 参考网页及资料
 
