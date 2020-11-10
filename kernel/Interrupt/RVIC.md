@@ -1,6 +1,9 @@
 + RVIC简介
-+ 支持的Hypervisor类型
+  + 支持的Hypervisor类型
+  + signaling
+  + RVIC enable
 + RVID简介
+
 
 # RVIC简介
 Reduced Virtual Interrupt Controller(RVIC)是一个半虚拟化(Para virtualized)的中断控制器，专门提供给VM用于支持基础的中断服务。
@@ -21,9 +24,15 @@ RVIC支持两种类型的中断：
 1. Trusted interrupts
 2. Untrusted interrupts
 
-每一个RVIC实例
+每一个RVIC实例都有他们独立的状态，彼此并不共享状态（这与GIC架构中GICR的设计有区别）。这可以降低RVIC实现的复杂性，并且允许VM的中断个数随vPE的个数自然增长。因此RVIC并不支持中断路由。因此，Untrusted IRQ需要通过RVID，而Trusted IRQ需要经由Trusted Hypervisor进行转发。
 
 # 支持的Hypervisor类型
 RVIC可支持整体型Hypervisor(monolithic hypervisor)和分离型Hypervisor(Split-mode hypervisor)。分离型Hypervisor根据中断的特权级别分为Trusted Hypervisor和Untrusted Hypervisor。对于整体型Hypervisor则不做区分。
+
+## RVIC enable
+
+
+## signaling
+
 
 # RVID简介
