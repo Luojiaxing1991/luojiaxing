@@ -9,7 +9,9 @@ Reduced Virtual Interrupt Controller(RVIC)是一个半虚拟化(Para virtualized
 
 ![RVIC Para virtualized](https://github.com/Luojiaxing1991/picture/blob/master/RVIC_para_virt.png)
 
-RVIC的目的是为了提供一个轻量级的中断控制器，从而可以作为Trusted Hypervisor的一部分嵌入到Hypervisor中。其他Hypervisor不需要的功能部分可以移动到VM或者untrusted Hypervisor中。
+RVIC支持整体型Hypervisor（monolithic hypervisor）和分离型Hypervisor（split-mode hypervisor）。分离型Hypervisor的实现跨越了数个特权等级（不同特权等级（ELx）在同一或者不同安全状态），从而导致分离型Hypervisor被切分为Trusted Hypervisor和Untrusted Hypervisor。
+
+RVIC的目的是为了提供一个轻量级的中断控制器，从而可以作为Trusted Hypervisor的一部分嵌入到Hypervisor中。其他Trusted Hypervisor不需要的功能部分可以移动到VM或者untrusted Hypervisor中。
 
 每一个VPE都会有一个RVIC的实例。中断处理，在硬件层面的最后一层都是由PE（vPE）写CPU接口（vCPU接口）的寄存器ICC_（ICV_）来通知CPU(vCPU)对中断进行处理。PE的上游就是中断控制器。但是对于vPE而言，在RVIC尚未问世的阶段，它的上游是Hypervisor或者ITS，如果硬件体系支持RVIC后，那么vPE的上游就变成了RVIC。谁来与vPE对接，这个并不重要，关键是对虚拟中断的管理是否变得更加轻松了。
 
