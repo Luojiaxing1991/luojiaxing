@@ -76,7 +76,26 @@ gic_irq_domain_map
 由于MSI都是经由PCI来发往ITS，因此PCIe是ITS的子级中断控制器。同理，ITS是GIC的子级中断控制器。而PCIe设备在申请MSI中断的时候，只能向PCIe申请。每一个PCIe设备能申请的最大中断个数由支持MSI或者MSI-X决定。MSI的话，上限为32个，而MSI-X则多达2048个。PCIe设备通过通用API：pci_alloc_irq_vectors或者亲和性API：pci_alloc_irq_vertors_affinity申请中断。中断亲和性不在这个章节描述，所以我们在这里只分析通用API
 
 ``` C
-
+pci_alloc_irq_vectors -
+                      + __pci_enable_msix_range()
+                      
+                      
+                      + __pci_enable_msi_range() -
+                                                 + msi_capability_init -
+                                                                       + pci_msi_setup_msi_irqs -
+                                                                                                + __msi_domain_alloc_irqs -
+                                                                                                                          + msi_domain_prepare_irqs(下沉到ITS里面)
+                                                                                                                          + __irq_domain_alloc_irqs
+                                                                                                                          
+ msi_domain_prepare_irqs -
+                         + its_pci_msi_prepare -   //决定分配多少LPI中断给这个PCI设备
+                                               + its_msi_prepare -   //为这个PCI设备创建对应的ITS设备，建立device事件与中断
+                                                                 + its_create_device -
+                                                                                     + its_alloc_device_table
+                                                                                     + its_lpi_alloc
+                                                                                     + its_send_mapd
+ 
+                      
 ```
 
 
