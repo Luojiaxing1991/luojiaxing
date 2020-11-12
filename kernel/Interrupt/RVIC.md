@@ -1,3 +1,5 @@
++ RVIC
++ RVIC体系与vGIC体系的对比
 + RVIC简介
   + 支持的Hypervisor类型
   + signaling
@@ -5,9 +7,17 @@
   + Trusted and Untrusted IRQ
 + RVID简介
 
+# RVIC
+Reduced Virtual Interrupt Controller(RVIC)是一个半虚拟化(Para virtualized)的中断控制器，专门提供给VM用于支持基础的中断服务。
+
+# RVIC体系与vGIC体系的对比
+## vGIC体系
+![vGIC体系](https://github.com/Luojiaxing1991/picture/blob/master/vGIC_arch.png)
+
+## RVIC体系
+![RVIC体系](https://github.com/Luojiaxing1991/picture/blob/master/RVIC_arch.png)
 
 # RVIC简介
-Reduced Virtual Interrupt Controller(RVIC)是一个半虚拟化(Para virtualized)的中断控制器，专门提供给VM用于支持基础的中断服务。
 
 根据半虚拟化的概念，GuestOS知道自己运行在虚拟环境中，可调用宿主机上专用的系统调用（Hypercall）来访问宿主机上的物理硬件。以RVIC为例：
 
