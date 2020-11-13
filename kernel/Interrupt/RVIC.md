@@ -18,11 +18,6 @@ Reduced Virtual Interrupt Controller(RVIC)是一个半虚拟化(Para virtualized
 ![RVIC体系](https://github.com/Luojiaxing1991/picture/blob/master/RVIC_arch.png)
 
 # RVIC简介
-
-根据半虚拟化的概念，GuestOS知道自己运行在虚拟环境中，可调用宿主机上专用的系统调用（Hypercall）来访问宿主机上的物理硬件。以RVIC为例：
-
-![RVIC Para virtualized](https://github.com/Luojiaxing1991/picture/blob/master/RVIC_para_virt.png)
-
 RVIC支持整体型Hypervisor（monolithic hypervisor）和分离型Hypervisor（split-mode hypervisor）。分离型Hypervisor的实现跨越了数个特权等级（不同特权等级（ELx）在同一或者不同安全状态），从而导致分离型Hypervisor被切分为Trusted Hypervisor和Untrusted Hypervisor。
 
 RVIC的目的是为了提供一个轻量级的中断控制器，从而可以作为Trusted Hypervisor的一部分嵌入到Hypervisor中。其他Trusted Hypervisor不需要的功能部分可以移动到VM或者untrusted Hypervisor中。
@@ -57,6 +52,12 @@ RVIC不保证在无限制的条件下实时传递中断。
 RVIC不处理VPE的调度。
 
 ## signaling
+当一个RVIC实例被使能且有一个以上的中断处于Unmasked and pending的状态，则它会通过中断的方式来通知VPE。
 
+在AArch64架构中，RVIC可以通过HCR_EL2.VI来产生一个virtual IRQ exception。VPE感知到这个virtual IRQ exception后，根据之前的描述，会询问RVIC有哪些中断需要处理。当RVIC实例里面已经没有Unmasked and Pending状态的中断是，RVIC实例会清除HCR_EL2.VI。这样的实现可以理解为RVIC对虚拟中断做了一个汇聚，在具体实现上应该会考虑只通知一次，而不会重复发中断通知。
+
+RVIC的另外一种中断上报的实现方式是考虑沿用GIC List Registers和GIC virtual CPU interface。但是这样做有一些限制：
+1. 必须在中断状态中引入active state，以及必须沿用GIC LPI的INTID
+2. LR的实现对于部分Hypervisor来说是比较复杂的。
 
 # RVID简介
