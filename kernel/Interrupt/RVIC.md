@@ -68,7 +68,8 @@ RVIC的设计意图是轻量化，并且其实现代码需要嵌入Trusted Hyper
 
 ## When will RVIC instance enable? Will it signal hypervisor to schedule a VPE when revice virtual interrupt?
 
-虚拟化需要考虑vPE当前没有被调度的情况，目前RVIC的设计spec并没有明确该点的设计思路，希望通过这个问题明确RVIC的中断注入设计细节。这样，无论是内部的trusted IRQ，外部的Untrusted IRQ都非常清晰了。
+虚拟化中断控制器需要考虑vPE当前没有被调度的情况，如何通知hypervisro调度VPE进行中断处理。目前RVIC的设计spec并没有明确该点的设计思路，希望通过这个问题明确RVIC的中断注入设计细节。这样，无论是内部的trusted IRQ，外部的Untrusted IRQ都非常清晰了。
+
 
 
 # RVID简介
