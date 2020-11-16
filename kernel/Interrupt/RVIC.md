@@ -5,6 +5,7 @@
   + signaling
   + RVIC enable
   + Trusted and Untrusted IRQ
++ RVIC的课题研究（过程中需要解答的问题）
 + RVID简介
 
 # RVIC
@@ -59,5 +60,15 @@ RVIC不处理VPE的调度。
 RVIC的另外一种中断上报的实现方式是考虑沿用GIC List Registers和GIC virtual CPU interface。但是这样做有一些限制：
 1. 必须在中断状态中引入active state，以及必须沿用GIC LPI的INTID
 2. LR的实现对于部分Hypervisor来说是比较复杂的。
+
+# RVIC的课题研究（过程中需要解答的问题）
+## What is split-mode hypervisor？In particular，really want to kown the design intent of Tursted and Untrusted Hypervisor(It's better to give an example to explain why Trusted Hypervisor and Untrusted Hypervisor are required).
+
+RVIC的设计意图是轻量化，并且其实现代码需要嵌入Trusted Hypervisor中。通过解答上面这个问题可以清晰RVIC的使用场景，明白为什么需要RVIC。另外，也希望借这个问题能弄明白RVIC是否是必须的，无可替代的（是否当前vGIC的设计已经无法满足固定场景的需求，所以需要RVIC）。
+
+## When will RVIC instance enable? Will it signal hypervisor to schedule a VPE when revice virtual interrupt?
+
+虚拟化需要考虑vPE当前没有被调度的情况，目前RVIC的设计spec并没有明确该点的设计思路，希望通过这个问题明确RVIC的中断注入设计细节。这样，无论是内部的trusted IRQ，外部的Untrusted IRQ都非常清晰了。
+
 
 # RVID简介
