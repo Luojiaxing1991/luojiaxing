@@ -62,7 +62,7 @@ RVIC的另外一种中断上报的实现方式是考虑沿用GIC List Registers�
 2. LR的实现对于部分Hypervisor来说是比较复杂的。
 
 # RVIC的课题研究（过程中需要解答的问题）
-## What is split-mode hypervisor？In particular，really want to kown the design intent of Tursted and Untrusted Hypervisor(It's better to give an example to explain why Trusted Hypervisor and Untrusted Hypervisor are required).
+## What is split-mode hypervisor？In particular，really want to kown the design intent of Tursted and Untrusted Hypervisor(Trusted Hypervisor is easily associated with Security Hypervisor, but we don't konw if this two are the same concept).
 
 RVIC的设计意图是轻量化，并且其实现代码需要嵌入Trusted Hypervisor中。通过解答上面这个问题可以清晰RVIC的使用场景，明白为什么需要RVIC。另外，也希望借这个问题能弄明白RVIC是否是必须的，无可替代的（是否当前vGIC的设计已经无法满足固定场景的需求，所以需要RVIC）。
 
